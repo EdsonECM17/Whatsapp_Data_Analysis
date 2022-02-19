@@ -28,29 +28,27 @@ class WhatsappReader:
     @staticmethod
     def __decompose_std_message(line:str):
         # author init_row
-        hour_msg_str = None
-        date_msg_str = None
+        dt_msg_str = None
         author_str = None
         message_str = None
         # Separate author and message from date if there is date
         splitted_line: List[str] = line.split(' - ')
         # Obtener fecha y hora
-        splitted_dt = splitted_line[0].split(" ")
-        date_msg_str = splitted_dt[0]
-        hour_msg_str = " ".join(splitted_dt[1:])
+        date_msg_str = splitted_line[0]
         # Concat author and message
         sended_data: str = " - ".join(splitted_line[1:])
         # Split author
         splited_sended_data: List[str] = sended_data.split(": ")
         # Get author and message body
         if len(splited_sended_data)> 1: #Check if author
-            author_str = splited_sended_data[0]
+            # Ignore data after a comma if exist
+            author_str = splited_sended_data[0].split(", ")[0] 
             message_str = ": ".join(splited_sended_data[1:])
         else:
             message_str=splited_sended_data[0]
             # author_str = "System"
         # Create content list
-        content_list = [date_msg_str, hour_msg_str, author_str, message_str]
+        content_list = [date_msg_str, author_str, message_str]
         return content_list        
 
     def read_file(self, file_path: str):
@@ -65,13 +63,13 @@ class WhatsappReader:
                 if self.__starts_with_dt(line):
                     message_data = self.__decompose_std_message(line)
                 else: 
-                    message_data = [None] * 3 + [line]
+                    message_data = [None] * 2 + [line]
                 #Store data in list of list
                 message_list.append(message_data)
         # Create dataframe
-        chat_df = pd.DataFrame(message_list, columns=['Date', 'Time', 'Author', 'Message'])
+        chat_df = pd.DataFrame(message_list, columns=['Datetime', 'Author', 'Message'])
         # Change Date to datetime object
-        chat_df["Date"] = pd.to_datetime(chat_df["Date"])
+        chat_df["Datetime"] = pd.to_datetime(chat_df["Datetime"])
         # Fill None values
         chat_df.fillna(method="ffill", inplace=True)
         # Delete system messages
