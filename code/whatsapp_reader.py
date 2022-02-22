@@ -1,4 +1,3 @@
-import os
 import re
 import pandas as pd
 
@@ -14,6 +13,20 @@ class WhatsappReader:
         chat_text_aj = chat_text_aj.replace("\u200e","")
         chat_text_aj = chat_text_aj.replace(" (archivo adjunto)","")
         return chat_text_aj
+
+    @staticmethod
+    def __clean_message(message: str) -> str:
+        # Remove symbols
+        # removed_characters = message.translate({ord(c): " " for c in "!@#$%^&*()[]{};:,./<>?\|`~-=_+"})
+        removed_characters = message
+        # Clean repeated spaces
+        removed_double_spaces = re.sub(' +', ' ', removed_characters)
+        # Clean removed and traling spaces
+        message_striped = removed_double_spaces.strip()
+        # Add termination to files
+        message_aj = message_striped.replace(" webp", ".webp")
+        message_aj = message_aj.replace(" jpg", ".jpg")
+        return message_aj
 
     @staticmethod
     def __starts_with_dt(line):
@@ -34,7 +47,7 @@ class WhatsappReader:
         # Separate author and message from date if there is date
         splitted_line: List[str] = line.split(' - ')
         # Obtener fecha y hora
-        date_msg_str = splitted_line[0]
+        dt_msg_str = splitted_line[0]
         # Concat author and message
         sended_data: str = " - ".join(splitted_line[1:])
         # Split author
@@ -48,7 +61,7 @@ class WhatsappReader:
             message_str=splited_sended_data[0]
             # author_str = "System"
         # Create content list
-        content_list = [date_msg_str, author_str, message_str]
+        content_list = [dt_msg_str, author_str, message_str]
         return content_list        
 
     def read_file(self, file_path: str):
@@ -64,6 +77,8 @@ class WhatsappReader:
                     message_data = self.__decompose_std_message(line)
                 else: 
                     message_data = [None] * 2 + [line]
+                #Clean message
+                message_data[-1] = self.__clean_message(message_data[-1])
                 #Store data in list of list
                 message_list.append(message_data)
         # Create dataframe
