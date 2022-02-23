@@ -26,6 +26,7 @@ class WhatsappReader:
         # Add termination to files
         message_aj = message_striped.replace(" webp", ".webp")
         message_aj = message_aj.replace(" jpg", ".jpg")
+        message_aj = message_aj.replace(" mp3", ".mp3")
         return message_aj
 
     @staticmethod
