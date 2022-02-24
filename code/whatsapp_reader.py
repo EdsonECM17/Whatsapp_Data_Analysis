@@ -49,6 +49,8 @@ class WhatsappReader:
         splitted_line: List[str] = line.split(' - ')
         # Obtener fecha y hora
         dt_msg_str = splitted_line[0]
+        dt_msg_str = dt_msg_str.replace("p.m.","PM")
+        dt_msg_str = dt_msg_str.replace("a.m.","AM")
         # Concat author and message
         sended_data: str = " - ".join(splitted_line[1:])
         # Split author
@@ -85,7 +87,7 @@ class WhatsappReader:
         # Create dataframe
         chat_df = pd.DataFrame(message_list, columns=['Datetime', 'Author', 'Message'])
         # Change Date to datetime object
-        chat_df["Datetime"] = pd.to_datetime(chat_df["Datetime"])
+        chat_df["Datetime"] = pd.to_datetime(chat_df["Datetime"], format="%d/%m/%Y %I:%M %p")
         # Fill None values
         chat_df.fillna(method="ffill", inplace=True)
         # Delete system messages
