@@ -145,6 +145,6 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 # input
-*.txt
+data/
 # output
 *.png
