@@ -4,11 +4,22 @@ import pandas as pd
 from typing import List
 
 class WhatsappReader:
+    """
+    Class to read and pre-process a whatsapp chat txt file.
+    """
     def __init__(self) -> None:
         pass
 
     @staticmethod
     def __clean_whatsapp_text(chat_text:str) -> str:
+        """Clean specific content of the entire Whatsapp textfile.
+
+        Args:
+            chat_text (str): String of Whatsapp chat.
+
+        Returns:
+            str: String with replacement changes.
+        """
         chat_text_aj = chat_text.replace("\xa0","")
         chat_text_aj = chat_text_aj.replace("\u200e","")
         chat_text_aj = chat_text_aj.replace(" (archivo adjunto)","")
@@ -16,6 +27,14 @@ class WhatsappReader:
 
     @staticmethod
     def __clean_message(message: str) -> str:
+        """Clean message content.
+
+        Args:
+            message (str): Message sentence.
+
+        Returns:
+            str: Message content after cleaning.
+        """
         # Remove symbols
         # removed_characters = message.translate({ord(c): " " for c in "!@#$%^&*()[]{};:,./<>?\|`~-=_+"})
         removed_characters = message
@@ -30,7 +49,15 @@ class WhatsappReader:
         return message_aj
 
     @staticmethod
-    def __starts_with_dt(line):
+    def __starts_with_dt(line:str) -> bool:
+        """Identifies if there is a timestamp in the message line
+
+        Args:
+            line (str): Line of whatsapp chat textfile.
+
+        Returns:
+            bool: Result of evaluation.
+        """
         # patron = '^[0-9]+\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+\s[a-zA-Z].\s[a-zA-Z].\s-'
         patron = '^[0-9]+\/[0-9]+\/[0-9]+ [0-9]+:[0-9]+\s[a-zA-Z].[a-zA-Z].\s-'
         result = re.match(patron, line)
@@ -40,7 +67,16 @@ class WhatsappReader:
             return False
 
     @staticmethod
-    def __decompose_std_message(line:str):
+    def __decompose_std_message(line:str) -> List[str]:
+        """
+        Separated message line into sections (datetime, author and message content).
+
+        Args:
+            line (str): Line of chat text file.
+
+        Returns:
+            List[str]: Filtered content of line in chat text.
+        """
         # author init_row
         dt_msg_str = None
         author_str = None
@@ -68,6 +104,16 @@ class WhatsappReader:
         return content_list        
 
     def read_file(self, file_path: str):
+        """
+        Read text file and turn data into a dataframe.
+        Columns are: [datetime, author, message]
+
+        Args:
+            file_path (str): Path of the text file.
+
+        Returns:
+            Dataframe: Chat table.
+        """
         message_list = []
         chat = open(file_path, encoding="utf-8")
         chat_text = chat.read()
